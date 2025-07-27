@@ -1,15 +1,7 @@
 import unittest
-
 from htmlnode import HTMLNode, LeafNode, ParentNode
 
 class TestHTMLNode(unittest.TestCase):
- #   def test_eq(self):
- #       node = HTMLNode("p", "This is a paragraph tag", ["child1", "child2"], {"href": "https://www.google.com", "target": "_blank",})
- #       node2 = HTMLNode("p", "This is a paragraph tag", ["child1", "child2"], {"href": "https://www.google.com", "target": "_blank",})
- #       self.assertEqual(node, node2)
-
-#self.tag = tag  # - A string representing the HTML tag name (e.g. "p", "a", "h1", etc.)
-
     def test_not_eq(self):
         node = HTMLNode("p", "This is a paragraph tag", ["child1", "child2"], {"href": "https://www.google.com", "target": "_blank",})
         node2 = HTMLNode("a", "This is a paragraph tag", ["child1", "child2"], {"href": "https://www.google.com", "target": "_blank",})
@@ -37,6 +29,7 @@ class TestHTMLNode(unittest.TestCase):
         actual = node.__repr__()
         self.assertEqual("HTMLNode(p, This is a paragraph tag, children: None, {'href': 'https://www.google.com', 'target': '_blank'})", actual)
 
+class TestToHTML(unittest.TestCase):
     def test_leaf_to_html_p(self):
         node = LeafNode("p", "Hello, world!")
         self.assertEqual(node.to_html(), "<p>Hello, world!</p>")
