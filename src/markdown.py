@@ -43,28 +43,19 @@ def split_nodes_image(old_nodes):
         split_nodes = []
         regex_exp = r"!\[([^\[\]]*)\]\(([^\(\)]*)\)"
         splits = re.split(regex_exp, node.text,)
-#        print(f"splits  {splits}")
-        found = False        
         matches = extract_markdown_images(node.text)
         for split in splits:
-#            print(f"split {split}")
-            if found:
-                found = False
-                continue
             for tuple in matches:
-                found = False
-#                print(f"tuple {tuple}")
-                if split == tuple[0]:
-#                    print(f"found[0]  {tuple[0]}")
-                    split_nodes.append(TextNode(split, TextType.IMAGE, tuple[1]))
-                    found = True
+                if len(tuple) != 2:
+                    raise ValueError("invalid markdown, image section not closed")
+                if split == tuple[0] or split == tuple[1]:
+                    if split == tuple[0]:
+                        split_nodes.append(TextNode(split, TextType.IMAGE, tuple[1]))
+                    split = ""
                     break # stop for loop
-            if not found:
-#                print(f"not found  {split}")
-                if split != "":
-                    split_nodes.append(TextNode(split, TextType.TEXT))
+            if split != "":
+                split_nodes.append(TextNode(split, TextType.TEXT))
         new_nodes.extend(split_nodes)
-#    print(new_nodes)
     return new_nodes
                                 
 def split_nodes_link(old_nodes):
@@ -77,30 +68,66 @@ def split_nodes_link(old_nodes):
         split_nodes = []
         regex_exp = r"(?<!!)\[([^\[\]]*)\]\(([^\(\)]*)\)"
         splits = re.split(regex_exp, node.text,)
-#        print(f"splits  {splits}")
-        found = False        
         matches = extract_markdown_links(node.text)
         for split in splits:
-#            print(f"split {split}")
-            if found:
-                found = False
-                continue
             for tuple in matches:
-                found = False
-#                print(f"tuple {tuple}")
-                if split == tuple[0]:
-#                    print(f"found[0]  {tuple[0]}")
-                    split_nodes.append(TextNode(split, TextType.LINK, tuple[1]))
-                    found = True
+                if len(tuple) != 2:
+                    raise ValueError("invalid markdown, link section not closed")
+                if split == tuple[0] or split == tuple[1]:
+                    if split == tuple[0]:
+                        split_nodes.append(TextNode(split, TextType.LINK, tuple[1]))
+                    split = ""
                     break # stop for loop
-            if not found:
-#                print(f"not found  {split}")
-                if split != "":
-                    split_nodes.append(TextNode(split, TextType.TEXT))
+            if split != "":
+                split_nodes.append(TextNode(split, TextType.TEXT))
         new_nodes.extend(split_nodes)
-#    print(new_nodes)
     return new_nodes
- 
+
+def text_to_textnodes(text):
+    new_nodes = [TextNode(text, TextType.TEXT)]
+    new_nodes = split_nodes_delimiter(new_nodes, "**" , TextType.BOLD) 
+    new_nodes = split_nodes_delimiter(new_nodes, "_" , TextType.ITALIC)
+    new_nodes = split_nodes_delimiter(new_nodes, "`" , TextType.CODE)
+    new_nodes = split_nodes_image(new_nodes)
+    new_nodes = split_nodes_link(new_nodes)
+#    print(f"\n")
+#    for node in new_nodes:
+#        print(f"{node}\n")
+    return new_nodes
+
+def markdown_to_blocks(markdown):
+#    text = "Block 1, Line 1\nBlock 1, Line 2\n\nBlock 2, Line 1\nBlock 2, Line 2  \n\nBlock 3, Line 1"
+    blocks = markdown.split('\n\n')
+    new_blocks = []
+    for block in blocks:
+        if block == "":
+            continue
+        strip_lines = block.strip()    #lstrip().rstrip(" \t\r\f\v")
+        new_blocks.append(strip_lines)
+
+#    print('\n')
+#    for block in new_blocks:
+#        print(f"{block}\n")
+    return new_blocks
+
+
+
+
+"""
+    blocks = markdown.split('\n\n')
+    new_blocks = []
+    for block in blocks:
+        lines = block.splitlines(keepends=True)
+        strip_lines = [line.strip() for line in lines if line.strip()]
+        if strip_lines:
+            new_blocks.append(strip_lines)
+
+    print('\n')
+    for block in new_blocks:
+        print(f"{block}\n")
+    return new_blocks
+
+"""
 """
 def split_nodes_image(old_nodes):
     new_nodes = []
