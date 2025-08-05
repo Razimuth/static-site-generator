@@ -21,14 +21,14 @@ def copy_directory_all_files(source_dir, destination_dir):
 
 #        print(f"copied from {source_item_path} to {destination_item_path}")
 
-def generate_pages_recursive(dir_path_content, template_path, dir_path_public):
+def generate_pages_recursive(dir_path_content, template_path, dir_path_docs, basepath="/"):
     for item in os.listdir(dir_path_content):
         item_path_content = os.path.join(dir_path_content, item)
-        item_path_public = os.path.join(dir_path_public, item)
+        item_path_docs = os.path.join(dir_path_docs, item)
 
         if os.path.isdir(item_path_content):
-            os.makedirs(item_path_public, exist_ok=True)
-            generate_pages_recursive(item_path_content, template_path, item_path_public)
+            os.makedirs(item_path_docs, exist_ok=True)
+            generate_pages_recursive(item_path_content, template_path, item_path_docs, basepath)
 
         elif os.path.isfile(item_path_content):
             try:
@@ -52,7 +52,10 @@ def generate_pages_recursive(dir_path_content, template_path, dir_path_public):
             html_page = template_content.replace("{{ Title }}", title)
             html_page = html_page.replace("{{ Content }}", markdown_html)
 
-            with open(os.path.join(dir_path_public, "index.html"), 'w') as file:
+            html_page = html_page.replace('href="/', 'href="{basepath}')
+            html_page = html_page.replace('src="/', 'src="{basepath}')
+                                          
+            with open(os.path.join(dir_path_docs, "index.html"), 'w') as file:
                 file.write(html_page)
 
 def extract_title(markdown):
