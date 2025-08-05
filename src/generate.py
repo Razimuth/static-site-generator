@@ -21,6 +21,55 @@ def copy_directory_all_files(source_dir, destination_dir):
 
 #        print(f"copied from {source_item_path} to {destination_item_path}")
 
+def generate_pages_recursive(dir_path_content, template_path, dir_path_public):
+    for item in os.listdir(dir_path_content):
+        item_path_content = os.path.join(dir_path_content, item)
+        item_path_public = os.path.join(dir_path_public, item)
+
+        if os.path.isdir(item_path_content):
+            os.makedirs(item_path_public, exist_ok=True)
+            generate_pages_recursive(item_path_content, template_path, item_path_public)
+
+        elif os.path.isfile(item_path_content):
+            try:
+                with open(item_path_content, 'r') as file:
+                    markdown_content = file.read()
+            except FileNotFoundError:
+                print(f"Error: The file '{item}' was not found.")
+            except Exception as e:
+                print(f"An error occurred: {e}")
+
+            try:
+                with open(template_path, 'r') as file:
+                   template_content = file.read()
+            except FileNotFoundError:
+                print(f"Error: The file '{template_path}' was not found.")
+            except Exception as e:
+                print(f"An error occurred: {e}")
+
+            markdown_html = markdown_to_html_node(markdown_content).to_html()
+            title = extract_title(markdown_content)
+            html_page = template_content.replace("{{ Title }}", title)
+            html_page = html_page.replace("{{ Content }}", markdown_html)
+
+            with open(os.path.join(dir_path_public, "index.html"), 'w') as file:
+                file.write(html_page)
+
+def extract_title(markdown):
+    lines = markdown.split("\n")
+    for line in lines:
+        if line.startswith("# "):
+            title = line.lstrip("# ").strip()
+            return title
+    raise Exception("No h1 heading found")
+
+
+
+
+
+
+
+"""
 def generate_page(from_path, template_path, dest_path):
     print(f' "Generating page from {from_path} to {dest_path} using {template_path}."')
 
@@ -54,21 +103,29 @@ def generate_page(from_path, template_path, dest_path):
         file.write(html_page)
 
 #    print(f"File '{html_page}' successfully written in '{dest_path}'.")
-
-def extract_title(markdown):
-    lines = markdown.split("\n")
-    for line in lines:
-        if line.startswith("# "):
-            title = line.lstrip("# ").strip()
-#            print(f"title = {title}")
-            return title
-    raise Exception("No h1 heading found")
+"""
 
 
 
 
 
 """
+
+from pathlib import Path
+from markdown_blocks import markdown_to_html_node
+
+
+def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
+    for filename in os.listdir(dir_path_content):
+        from_path = os.path.join(dir_path_content, filename)
+        dest_path = os.path.join(dest_dir_path, filename)
+        if os.path.isfile(from_path):
+            dest_path = Path(dest_path).with_suffix(".html")
+            generate_page(from_path, template_path, dest_path)
+        else:
+            generate_pages_recursive(from_path, template_path, dest_path)
+
+
 def copy_files_recursive(source_dir_path, dest_dir_path):
     if not os.path.exists(dest_dir_path):
         os.mkdir(dest_dir_path)
