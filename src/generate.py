@@ -8,7 +8,6 @@ def copy_directory_all_files(source_dir, destination_dir):
     else:
         shutil.rmtree(destination_dir)
         os.makedirs(destination_dir)
-#        print(f"removed {destination_dir}")
 
     for item in os.listdir(source_dir):
         source_item_path = os.path.join(source_dir, item)
@@ -18,8 +17,6 @@ def copy_directory_all_files(source_dir, destination_dir):
             shutil.copy(source_item_path, destination_item_path)
         elif os.path.isdir(source_item_path):
             copy_directory_all_files(source_item_path, destination_item_path)
-
-#        print(f"copied from {source_item_path} to {destination_item_path}")
 
 def generate_pages_recursive(dir_path_content, template_path, dir_path_docs, basepath="/"):
     for item in os.listdir(dir_path_content):
@@ -52,9 +49,9 @@ def generate_pages_recursive(dir_path_content, template_path, dir_path_docs, bas
             html_page = template_content.replace("{{ Title }}", title)
             html_page = html_page.replace("{{ Content }}", markdown_html)
 
-            html_page = html_page.replace('href="/', 'href="{basepath}')
-            html_page = html_page.replace('src="/', 'src="{basepath}')
-                                          
+            html_page = html_page.replace('href="/', f'href="{basepath}')
+            html_page = html_page.replace('src="/', f'src="{basepath}')
+
             with open(os.path.join(dir_path_docs, "index.html"), 'w') as file:
                 file.write(html_page)
 
